@@ -1,0 +1,51 @@
+---
+
+- when: haproxy_host_state != 'absent'
+  block:
+
+    - name: Create server group
+      os_server_group:
+        state: present
+        name: "{{ haproxy_server_group_name }}"
+        policies:
+         - "anti-affinity"
+      register: server_group
+
+    - name: Create server {{ haproxy_host_server_name }}
+      os_server:
+        state: "{{ haproxy_host_state }}"
+        name: "{{ haproxy_host_server_name }}"
+        image: "{{ haproxy_host_image }}"
+        flavor: "{{ haproxy_host_flavor }}"
+        key_name: "{{ haproxy_host_key_name }}"
+        boot_from_volume: true
+        auto_ip: "{{ haproxy_host_auto_ip }}"
+        meta: "{{ haproxy_host_metadata }}"
+        availability_zone: "{{ haproxy_host_availability_zone }}"
+        security_groups: "{{ haproxy_host_security_groups }}"
+        nics: "{{ haproxy_host_network }}"
+        volume_size: "{{ haproxy_host_root_volume_size }}"
+        scheduler_hints:
+          group: "{{ server_group.id }}"
+        userdata: |
+          #cloud-config
+          fqdn: {{ haproxy_host_server_fqdn }}
+          packages:
+          growpart:
+          mode: auto
+          devices: ['/']
+          ignore_growroot_disabled: false
+      register: server
+
+- when: haproxy_host_state == 'absent'
+  block:
+
+    - name: Delete host
+      os_server:
+        state: absent
+        name: "{{ haproxy_host_server_name }}"
+
+    - name: Delete server group
+      os_server_group:
+        state: absent
+        name: "{{ haproxy_server_group_name }}"

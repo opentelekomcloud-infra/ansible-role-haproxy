@@ -1,0 +1,17 @@
+---
+# handlers file for opentelekomcloud_infra.haproxy
+#
+- name: restart haproxy
+  become: true
+  service:
+    name: haproxy
+    state: restarted
+    enabled: true
+    daemon_reload: true
+
+- name: restart firewalld
+  become: true
+  service:
+    name: firewalld
+    state: restarted
+    enabled: true

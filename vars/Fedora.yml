@@ -1,0 +1,6 @@
+---
+
+packages:
+  - haproxy
+  - firewalld
+  - python3-firewall

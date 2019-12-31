@@ -1,0 +1,24 @@
+global
+    maxconn 100
+
+defaults
+    log global
+    mode tcp
+    retries 2
+    timeout client 30m
+    timeout connect 4s
+    timeout server 30m
+    timeout check 5s
+
+{% if haproxy_enable_stats %}
+listen stats
+    mode   http
+    bind   *:{{ haproxy_stats_port }}
+    stats  enable
+    stats  show-legends
+    stats  uri     /
+    stats  refresh 5s
+    stats  realm   Haproxy\ Statistics
+    stats  auth    {{ haproxy_stats_username }}:{{ haproxy_stats_password }}
+    stats  admin   if TRUE
+{% endif %}

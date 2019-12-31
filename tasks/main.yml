@@ -1,0 +1,54 @@
+---
+# tasks file for opentelekomcloud_infra.haproxy
+- name: "Include {{ ansible_distribution }} variables"
+  include_vars: "{{ item }}"
+  with_first_found:
+    - "{{ ansible_distribution }}.yml"
+    - "{{ ansible_os_family }}.yml"
+
+- name: Install required packages
+  become: true
+  package:
+    state: present
+    name: "{{ item }}"
+  with_items: "{{ packages }}"
+  register: task_result
+  until: task_result is success
+  retries: 5
+
+- name: Allow ports in firewall
+  become: true
+  firewalld:
+    port: "{{ item }}"
+    permanent: yes
+    state: enabled
+    immediate: yes
+  loop: "{{ haproxy_outside_ports }}"
+  notify:
+    - restart firewalld
+
+- name: Write haproxy config
+  become: true
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: "{{ item.owner | default(haproxy_os_user) }}"
+    group: "{{ item.group | default(haproxy_os_group) }}"
+    mode: "{{ item.mode | default('0644') }}"
+  loop:
+    - {src: "haproxy.cfg.j2", dest: "/etc/haproxy/haproxy.cfg" }
+  when: haproxy_config is not defined
+  notify:
+    - restart haproxy
+
+- name: Write predefined config
+  become: true
+  copy:
+    dest: "/etc/haproxy/haproxy.cfg"
+    content: "{{ haproxy_config }}"
+    owner: "{{ haproxy_os_user }}"
+    group: "{{ haproxy_os_group }}"
+    mode: "0644"
+  when: haproxy_config is defined
+  notify:
+    - restart haproxy
