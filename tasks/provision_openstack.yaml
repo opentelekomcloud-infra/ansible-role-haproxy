@@ -11,6 +11,18 @@
          - "anti-affinity"
       register: server_group
 
+   - name: Create home Volume {{ haproxy_host_home_volume_name }}
+      os_volume:
+        state: "{{ haproxy_host_state }}"
+        name: "{{ haproxy_host_home_volume_name }}"
+        size: "{{ haproxy_host_home_volume_size }}"
+        volume_type: "{{ haproxy_host_home_volume_type | default(omit) }}"
+        availability_zone: "{{ haproxy_host_availability_zone }}"
+        metadata: "{{ haproxy_host_home_volume_metadata }}"
+        wait: true
+      when: haproxy_host_home_volume_size is defined
+      register: home_volume
+
     - name: Create server {{ haproxy_host_server_name }}
       os_server:
         state: "{{ haproxy_host_state }}"
@@ -25,6 +37,8 @@
         security_groups: "{{ haproxy_host_security_groups }}"
         nics: "{{ haproxy_host_network }}"
         volume_size: "{{ haproxy_host_root_volume_size }}"
+        volumes:
+          - "{{ home_volume.id }}"
         scheduler_hints:
           group: "{{ server_group.id }}"
         userdata: |
@@ -35,6 +49,19 @@
           mode: auto
           devices: ['/']
           ignore_growroot_disabled: false
+        disk_setup:
+            /dev/vdb:
+              table_type: 'mbr'
+              layout:
+               - 100
+
+          fs_setup:
+            - label: home
+              filesystem: ext4
+              device: '/dev/vdb1'
+
+          mounts:
+            - [ "LABEL=home", "/home", "auto", "defaults", "0", "2" ]
       register: server
 
 - when: haproxy_host_state == 'absent'
@@ -49,3 +76,8 @@
       os_server_group:
         state: absent
         name: "{{ haproxy_server_group_name }}"
+
+    - name: Delete home volume
+      os_volume:
+        state: absent
+        name: "{{ executor_host_home_volume_name }}"

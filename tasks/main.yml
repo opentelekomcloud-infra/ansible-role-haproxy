@@ -27,6 +27,13 @@
   notify:
     - restart firewalld
 
+- name: Allow haproxy in selinux
+  become: true
+  seboolean:
+    name: haproxy_connect_any
+    state: yes
+    presistent: yes
+
 - name: Write haproxy config
   become: true
   template:

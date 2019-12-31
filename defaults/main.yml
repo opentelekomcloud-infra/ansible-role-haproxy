@@ -14,10 +14,13 @@ haproxy_host_availability_zone: "eu-de-01"
 haproxy_host_root_volume_size: 12
 # Auto attach FIP
 haproxy_host_auto_ip: false
+executor_host_home_volume_name: "{{ (haproxy_host_name + '_home.' + domain_name ) }}"
+executor_host_home_volume_size: 50
+executor_host_home_volume_type: "SATA"
 
 haproxy_host_metadata:
   host-type: haproxy
-haproxy_host_data_volume_metadata:
+haproxy_host_home_volume_metadata:
   host-type: haproxy
 
 haproxy_server_group_name: haproxy
