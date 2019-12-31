@@ -32,7 +32,7 @@
   seboolean:
     name: haproxy_connect_any
     state: yes
-    presistent: yes
+    persistent: yes
 
 - name: Write haproxy config
   become: true
