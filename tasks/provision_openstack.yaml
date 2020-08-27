@@ -11,7 +11,7 @@
          - "anti-affinity"
       register: server_group
 
-   - name: Create home Volume {{ haproxy_host_home_volume_name }}
+    - name: Create home Volume {{ haproxy_host_home_volume_name }}
       os_volume:
         state: "{{ haproxy_host_state }}"
         name: "{{ haproxy_host_home_volume_name }}"
