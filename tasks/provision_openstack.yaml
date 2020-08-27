@@ -55,13 +55,13 @@
               layout:
                - 100
 
-          fs_setup:
-            - label: home
-              filesystem: ext4
-              device: '/dev/vdb1'
+        fs_setup:
+          - label: home
+            filesystem: ext4
+            device: '/dev/vdb1'
 
-          mounts:
-            - [ "LABEL=home", "/home", "auto", "defaults", "0", "2" ]
+        mounts:
+          - [ "LABEL=home", "/home", "auto", "defaults", "0", "2" ]
       register: server
 
 - when: haproxy_host_state == 'absent'
