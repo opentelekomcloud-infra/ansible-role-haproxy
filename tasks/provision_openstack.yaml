@@ -46,9 +46,9 @@
           fqdn: {{ haproxy_host_server_fqdn }}
           packages:
           growpart:
-          mode: auto
-          devices: ['/']
-          ignore_growroot_disabled: false
+            mode: auto
+            devices: ['/']
+            ignore_growroot_disabled: false
           disk_setup:
             /dev/vdb:
               table_type: 'mbr'
@@ -57,8 +57,8 @@
 
           fs_setup:
             - label: home
-            filesystem: ext4
-            device: '/dev/vdb1'
+              filesystem: ext4
+              device: '/dev/vdb1'
 
           mounts:
             - [ "LABEL=home", "/home", "auto", "defaults", "0", "2" ]
